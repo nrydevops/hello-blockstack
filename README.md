@@ -2,203 +2,190 @@
   <img src="https://blockstack.org/images/resources/browser-home-screen@2x.png" alt="Blockstack Browser screenshot" width="686" height="306">
 </p>
 
-# Blockstack Browser [![CircleCI](https://img.shields.io/circleci/project/blockstack/blockstack-browser/master.svg)](https://circleci.com/gh/blockstack/blockstack-browser/tree/master) [![License](https://img.shields.io/github/license/blockstack/blockstack-browser.svg)](https://github.com/blockstack/blockstack-browser/blob/master/LICENSE.md) [![Slack](https://img.shields.io/badge/join-slack-e32072.svg?style=flat)](http://slack.blockstack.org/)
+# hello-blockstack [![CircleCI](https://img.shields.io/circleci/project/blockstack/blockstack-browser/master.svg)](https://circleci.com/gh/blockstack/blockstack-browser/tree/master) [![License](https://img.shields.io/github/license/blockstack/blockstack-browser.svg)](https://github.com/blockstack/blockstack-browser/blob/master/LICENSE.md) [![Slack](https://img.shields.io/badge/join-slack-e32072.svg?style=flat)](http://slack.blockstack.org/)
 
-The Blockstack Browser allows you to explore the Blockstack internet.
+Welcome!
 
-## Table of contents
+In this tutorial, we're going to walk through building a simple application on Blockstack.
 
-- [Releases](#releases)
-- [Developing](#developing)
-- [Building for macOS](#building-for-macos)
-- [Building for the Web](#building-for-the-web)
-- [Contributing](#contributing)
-- [Logging](#logging)
-- [Tech Stack](#tech-stack)
-- [Maintainer](#maintainer)
-- [Testing](#testing)
+This app will be a single-page application (SPA) that runs completely client-side. It will have no backend API to talk to, other than the identity and storage API that the user provides. In this sense, it will be a completely decentralized, server-less application.
 
-## Releases
+For this tutorial, we will use the following tools:
 
-[Download the latest release](https://github.com/blockstack/blockstack-browser/releases)
+npm to manage dependencies and scripts
+browserify to compile node code into browser-ready code
+blockstack.js to authenticate the user and work with the user's identity/profile information
 
-## Developing
-
-### macOS
-
-*Please note these instructions have only been tested on macOS 10.13*
-
-1. Download and install the [latest release of Blockstack for Mac](https://github.com/blockstack/blockstack-browser/releases).
-1. Start Blockstack
-1. Option-click the Blockstack menu bar item and select "Enable Development Mode"
-1. Clone this repo: `git clone https://github.com/blockstack/blockstack-browser.git`
-1. Install node dependencies: `npm install`
-1. Run `npm run dev`
+Part 1: Installation & Generation
+First, install Yeoman (a popular app generation tool) along with the Blockstack App Generator:
 
 
-### Linux
-
-1. Clone this repo: `git clone https://github.com/blockstack/blockstack-browser.git`
-1. Install node dependencies: `npm install`
-1. Run `npm run dev-proxy` to start the CORS proxy
-1. Run `npm run dev`
-
-*Note: npm dev runs a BrowserSync process that watches the assets in `/app`, then builds them and places them in `/build`, and in turn serves them up on port 3000. When changes are made to the original files, they are rebuilt and re-synced to the browser frames you have open.*
-
-##### Troubleshooting
-
-Common problems and solutions:
-
-* **The sign-in page does not load**:  These instructions run the Browser in development
-  mode, which uses a different port (3000) than the production mode (8888).
-However, existing applications will direct you to `http://localhost:8888` on
-sign-in.  You will need to *manually* edit the URL to change `8888` to `3000`
-and refresh the page.
-
-* **The sign-in page does not load with localhost:3000**:  If you have taken the
-  above step and the page still does not load, check your `auth=` query
-parameter.  If it starts with any number of `/` characters, remove them and
-reload the page.  For example, if your `auth=` query looks like
-`auth=///abcdef...`, then you will need to change it to `auth=abcdef...`.
-
-## Building for macOS
-
-1. Make sure you have a working installation of Xcode 9 or higher & valid Mac Developer signing certificate
-1. Make sure you have an OpenSSL ready for bottling by homebrew by running `brew install openssl --build-bottle`
-1. Make sure you have `hg` installed by running `brew install hg`
-1. Run `npm install nexe -g` to install the "node to native" binary tool globally
-1. Open the Blockstack macOS project in Xcode and configure your code signing development team (You only need to do this once)
-1. Run `npm run mac` to build a debug release signed with your Mac Developer certificate
-
-*Note: You only need to run `nexe` once but the first build will take a while as `nexe` downloads and compiles a source copy of node. Then it creates and copies the needed proxy binaries into place and copies a built version of the browser web app into the source tree.*
-
-*Note: This has only been tested on macOS High Sierra 10.13*
-
-### Building a macOS release for distribution
-
-1. Ensure you have valid Developer ID signing credentials in your Keychain. (See https://developer.apple.com/developer-id/ for more information)
-1. Follow the instructions in the above section for building for macOS.
-1. Open the Blockstack macOS project in Xcode.
-1. Select the Product menu and click Archive.
-1. When the archive build completes, the Organizer window will open. Select your new build.
-1. Click "Export..."
-1. Click "Export a Developer ID-signed Application"
-1. Choose the development team with the Developer ID you'd like to use to sign the application.
-1. Click "Export" and select the location to which you would like to save the signed build.
+npm install -g yo generator-blockstack
+Next, create a directory for the application and enter into that directory:
 
 
-## Building for the Web
+mkdir hello-blockstack && cd hello-blockstack
+mkdir hello-blockstack && cd hello-blockstack
+Then, use the Blockstack App Generator to generate a simple Blockstack app:
 
-1. Make sure you've cloned the repo and installed all npm assets (as shown above)
-1. Run `npm run web`
+
+yo blockstack
+yo blockstack
+After you respond to the prompts, the app generator will create all of the app files and then install all dependencies.
+
+Part 2: Serving the App
+Start the development static file server to serve the app locally
 
 
-## Contributing
+npm run start
+npm run start
+The simple static file server can be found in server.js.
 
-We do project-wide sprints every two weeks and we're always looking for more help.
+This server will serve all of the files in the /public directory, including index.html, app.js, bootstrap.min.css and app.css.
 
-If you'd like to contribute, head to the [contributing guidelines](/CONTRIBUTING.md). Inside you'll find directions for opening issues, coding standards, and notes on development.
+Part 3: Main App Code
+The main file of our app is called app.js (in the /public folder). This is where the majority of the logic is contained.
 
-## Logging
+As you can see, all of the code in the file is wrapped in an event listener that waits until the DOM content has been loaded:
 
-The Browser uses `log4js` for logging. The macOS app uses macOS's unified logging
-API, `os_log` for logging.
 
-### macOS
+1
+document.addEventListener("DOMContentLoaded", function(event) {
+2
+})
+Inside of this, we have a sign in button handler that creates an auth request and redirects the user to sign in:
 
-On macOS, the Browser sends log events to the macOS
-app's log server. These are then included in macOS's unified logging API. You
-can view logs by starting `Console.app`.
 
-To see only `Blockstack` process logs, filter by process by
-typing `process: Blockstack` in the search box. You can also filter for only log
-entries proactively generated by the BLockstack project using this query:
-`subsystem:org.blockstack.portal subsystem:org.blockstack.core subsystem:org.blockstack.mac`
-If you'd like to see more detail, enable the inclusion
-of Info and Debug messages in the Action menu. Please note that in our experience,
-`Console.app` doesn't always show debug messages in real time and only shows them
-when doing a log dump as described below.
+1
+document.getElementById('signin-button').addEventListener('click', function() {
+2
+  blockstack.redirectUserToSignIn()
+3
+})
+We also have a sign out button handler that deletes the local user data and signs the user out:
 
-#### Sending logs to developers
 
-Blockstack logs are included in macOS's unified logging system. This allows
-us to easily collect a large amount of information about the user's system when
-we need to troubleshoot a problem while protecting their privacy.
+1
+document.getElementById('signout-button').addEventListener('click', function() {
+2
+  blockstack.signUserOut(window.location.origin)
+3
+})
+Next, we have a function for showing the user's profile:
 
-1. Press Shift-Control-Option-Command-Period. Your screen will briefly flash.
-2. After a few minutes, a Finder window will automatically open to `/private/var/tmp`
-3. Send the most recent `sysdiagnose_DATE_TIME.tar.gz` file to your friendly developers.
 
-The most important file in this archive is `system_logs.logarchive`, which will
-include recent system logs including Blockstack's logs. You can open it on
-a Mac using `Console.app`. The other files include information about your computer
-that may help in diagnosing problems.
+1
+function showProfile(profile) {
+2
+  const person = new blockstack.Person(profile)
+3
+  document.getElementById('heading-name').innerHTML = person.name()
+4
+  document.getElementById('avatar-image').setAttribute('src', person.avatarUrl())
+5
+  document.getElementById('section-1').style.display = 'none'
+6
+  document.getElementById('section-2').style.display = 'block'
+7
+}
+Then, we have logic for signing the user in and displaying the application.
 
-If you're worried about inadvertently sending some private information,
-you can select the log entries you'd like to send inside `Console.app` and copy
-them into an email or github issue. To help us debug your problem, we ask that
-at a minimum you enable Info and Debug messages and filter by `process: Blockstack`.
+Note that there are 3 main states the user can be in:
 
-More technical users (with admin permission) can use the `sysdiagnose` command
-to generate a custom dump of information.
+The user is already signed in
+The user has a sign in request that is pending
+The user is signed out
+We express that as follows:
 
-## Tech Stack
 
-This app uses the latest versions of the following libraries:
+1
+if (blockstack.isUserSignedIn()) {
+2
+  // Show the user's profile
+3
+} else if (blockstack.isSignInPending()) {
+4
+  // Sign the user in
+5
+} else {
+6
+  // Do nothing
+7
+}
+With the first condition (when the user is signed in), we load the user data from local storage and then display the profile. With the second condition (when the user has a pending sign in request), we sign the user in and redirect the user back to the home page.
 
-- [React Rocket Boilerplate](https://github.com/jakemmarsh/react-rocket-boilerplate)
-- [ReactJS](https://github.com/facebook/react)
-- [React Router](https://github.com/rackt/react-router)
-- [RefluxJS](https://github.com/spoike/refluxjs)
-- [Gulp](http://gulpjs.com/)
-- [Browserify](http://browserify.org/)
-- [Redux](https://github.com/reactjs/redux)
-- [Babel](https://github.com/babel/babel)
 
-Along with many Gulp libraries (these can be seen in either `package.json`, or at the top of each task in `/gulp/tasks/`).
+1
+if (blockstack.isUserSignedIn()) {
+2
+   const profile = blockstack.loadUserData().profile
+3
+  showProfile(profile)
+4
+} else if (blockstack.isSignInPending()) {
+5
+  blockstack.handlePendingSignIn().then(function(userData) {
+6
+    window.location = window.location.origin
+7
+  })
+8
+}
+Part 4: App Manifest
+The app manifest file (/public/manifest.json) contains configurations for your app that dictate how it will be displayed in auth views and on user home screens.
 
-## Maintainer
+The manifest.json file should look like this:
 
-This repository is maintained by [yukan.id](https://explorer.blockstack.org/name/yukan.id).
 
-## Testing
+1
+{
+2
+  "name": "Hello, Blockstack",
+3
+  "start_url": "localhost:5000",
+4
+  "description": "A simple demo of Blockstack Auth",
+5
+  "icons": [{
+6
+    "src": "https://helloblockstack.com/icon-192x192.png",
+7
+    "sizes": "192x192",
+8
+    "type": "image/png"
+9
+  }]
+10
+}
+Keep it as is or fill it in with new information that describes your app.
 
-1. If you haven't already, follow steps 1 & 2 above
-2. If you haven't already run `npm run dev` or `npm run build` at least once, run `npm run build`
-3. Run all tests in the `test/` directory with the `npm run test` command
-  * A single file can be run by specifing an `-f` flag: `npm run test <PATH_TO_TEST_FILE>`
+Part 5: Source Control
+To complete the tutorial, save your app code by pushing it to GitHub.
 
-*Note: When running tests, code coverage will be automatically calculated and output to an HTML file using the [Istanbul](https://istanbul.js.org/) library. These files can be seen in the generated `__coverage__/` directory.*
+First, create a simple git repo:
 
-## App Development
-### Run the browser in the Blockstack Test Environment
 
-When developing apps, the browser can be run in a docker test environment that is backed by the regtest bitcoin network, hence no real money involved.
+git init
+git init
+Next, add and commit all of the files:
 
-The easiest way to get that setup is through docker containers for the api, the browser and the cors-proxy. There is a  [docker-compose.yaml file](https://github.com/blockstack/blockstack-todos/blob/master/docker-compose.yaml) published in the Blockstack todo app repo that does this. To use it, first [install Docker](https://docs.docker.com/engine/installation/) and stop any running Blockstack applications (blockstack-browser or blockstack api) then:
 
-```
-$ docker-compose up -d
-```
+git add . && git commit -m "first commit"
+git add . && git commit -m "first commit"
+Then, create a new repo on GitHub and name it "hello-blockstack":
 
-This brings up
-1. a `blockstack-core api` node that is backed
-   * by a `bitcoind` instance running **regtest** and
-   * by a [`blockstack-core`](https://github.com/blockstack/blockstack-core) node built from the test chain.
+https://github.com/new
 
-   The initialization script generates 50 BTCs for the core wallet.
-1. a blockstack-browser node. It uses bitcoin addresses that are mapped to regtest bitcoin addresses.
-1. a [cors-proxy](https://www.npmjs.com/package/corsproxy) to bypass origin policy issues.
+After that, add the remote repo to your local git repo. Make sure to fill in your username:
 
-The easiest way to work with this setup is in **Incognito mode** in your browser. Once the images have been pulled down and the containers are started you can open http://localhost:8888.
 
-Choose the Advanced Mode setup and enter the API Password as `blockstack_integration_test_api_password`
+git remote add origin git@github.com:YOUR_USERNAME_HERE/hello-blockstack.git
+git remote add origin git@github.com:YOUR_USERNAME_HERE/hello-blockstack.git
+Last, push all of the code to the master branch of the remote repo:
 
-### Common Tasks
-* You can send bitcoins from the core wallet to the browser wallet by opening the hidden url [http://localhost:8888/wallet/send-core](http://localhost:8888/wallet/send-core)
 
-* You can inspect the mapped bitcoin addresses from the browser node to the regtest address by looking into the log file of the api node (execute `bash` in the api container and look at /tmp/blockstack-run-scenario.blockstack_integration_tests.scenarios.portal_test_env/client/api_endpoint.log).
+git push origin master
+git push origin master
+You're done! You just built your first Blockstack app and shipped the code.
 
-* You can inspect the api password by looking into the client.ini file of the api node (execute `bash` in the api container and look at /tmp/blockstack-run-scenario.blockstack_integration_tests.scenarios.portal_test_env/client/client.ini)
-
-* You can verify the blockstack version of the api node by running `curl localhost:6270/v1/node/ping`
+You're well on your way to becoming a Blockstack app legend.
